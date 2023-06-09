@@ -18,30 +18,30 @@ public class Polynomial{
 
 	public Polynomial(File file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
-		String line = reader.readLine();
+		String poly = reader.readLine();
 		reader.close();
 
 		String[] terms;
-		terms = line.split("(?=[+-])");
+		terms = poly.split("(?=[+-])");
 
-		double[] parsedCoefficients = new double[terms.length];
-		int[] parsedExponents = new int[terms.length];
+		double[] newCoeffs = new double[terms.length];
+		int[] newPowers = new int[terms.length];
 
 		for (int i = 0; i < terms.length; i++) {
 			String term = terms[i];
-			int caretIndex = term.indexOf('x');
+			int splitIndex = term.indexOf('x');
 
-			if (caretIndex != -1) {
-				parsedCoefficients[i] = Double.parseDouble(term.substring(0, caretIndex));
-				parsedExponents[i] = Integer.parseInt(term.substring(caretIndex + 1));
+			if (splitIndex != -1) {
+				newCoeffs[i] = Double.parseDouble(term.substring(0, splitIndex));
+				newPowers[i] = Integer.parseInt(term.substring(splitIndex + 1));
 			} else {
-				parsedCoefficients[i] = Double.parseDouble(term);
-				parsedExponents[i] = 0;
+				newCoeffs[i] = Double.parseDouble(term);
+				newPowers[i] = 0;
 			}
 		}
 
-		this.coeff = parsedCoefficients;
-		this.powers = parsedExponents;
+		this.coeff = newCoeffs;
+		this.powers = newPowers;
 	}
 
 	public Polynomial add(Polynomial p){
@@ -113,29 +113,21 @@ public class Polynomial{
 
 	public void saveToFile(String fileName) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-			StringBuilder sb = new StringBuilder();
-
-			for (int i = 0; i < coeff.length; i++) {
-				if (coeff[i] != 0) {
-					if (coeff[i] > 0 && i != 0) {
-						sb.append("+");
+			for (int i = 0; i < this.coeff.length; i++) {
+				if (this.coeff[i] != 0) {
+					if (this.powers[i] == 0) {
+						writer.write(this.coeff[i] + "");
+					} else {
+						writer.write(this.coeff[i] + "x" + this.powers[i]);
 					}
 
-					sb.append(coeff[i]);
-
-					if (powers[i] != 0) {
-						sb.append("x");
-
-						if (powers[i] != 1) {
-							sb.append(powers[i]);
-						}
+					if (i < this.coeff.length - 1) {
+						writer.write("+");
 					}
 				}
 			}
-
-			writer.write(sb.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Error: Could not write to file!" + e.getMessage());
 		}
 	}
 }
