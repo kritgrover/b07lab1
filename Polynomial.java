@@ -49,14 +49,38 @@ public class Polynomial{
 		double[] newCoeff = new double[length];
 		int[] newPowers = new int[length];
 
-		for (int i = 0; i < this.coeff.length; i++) {
-			newCoeff[this.powers[i]] += this.coeff[i];
-			newPowers[this.powers[i]] = this.powers[i];
+		int i = 0, j = 0, k = 0;
+
+		while (i < coeff.length && j < p.coeff.length) {
+			if (this.powers[i] < p.powers[j]) {
+				newCoeff[k] = this.coeff[i];
+				newPowers[k] = this.powers[i];
+				i++;
+			} else if (this.powers[i] > p.powers[j]) {
+				newCoeff[k] = p.coeff[j];
+				newPowers[k] = p.powers[j];
+				j++;
+			} else {
+				newCoeff[k] = this.coeff[i] + p.coeff[j];
+				newPowers[k] = this.powers[i];
+				i++;
+				j++;
+			}
+			k++;
 		}
 
-		for (int i = 0; i < p.coeff.length; i++) {
-			newCoeff[p.powers[i]] += p.coeff[i];
-			newPowers[p.powers[i]] = p.powers[i];
+		while (i < coeff.length) {
+			newCoeff[k] = this.coeff[i];
+			newPowers[k] = this.powers[i];
+			i++;
+			k++;
+		}
+
+		while (j < p.coeff.length) {
+			newCoeff[k] = p.coeff[j];
+			newPowers[k] = p.powers[j];
+			j++;
+			k++;
 		}
 
 		return returnTrimmed(newCoeff, newPowers, length);
@@ -111,23 +135,27 @@ public class Polynomial{
 		return new Polynomial(finalCoeff, finalPowers);
 	}
 
-	public void saveToFile(String fileName) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-			for (int i = 0; i < this.coeff.length; i++) {
-				if (this.coeff[i] != 0) {
-					if (this.powers[i] == 0) {
-						writer.write(this.coeff[i] + "");
-					} else {
-						writer.write(this.coeff[i] + "x" + this.powers[i]);
-					}
+	public void saveToFile(String fileName) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 
-					if (i < this.coeff.length - 1) {
-						writer.write("+");
-					}
+		boolean isFirstTerm = true;
+
+		for (int i = 0; i < this.coeff.length; i++) {
+			if (this.coeff[i] != 0) {
+				if (!isFirstTerm) {
+					writer.write(this.coeff[i] > 0 ? "+" : "-");
+				} else {
+					isFirstTerm = false;
+				}
+
+				writer.write(Double.toString(Math.abs(this.coeff[i])));
+
+				if (this.powers[i] > 0) {
+					writer.write("x" + this.powers[i]);
 				}
 			}
-		} catch (IOException e) {
-			System.err.println("Error: Could not write to file!" + e.getMessage());
 		}
+
+		writer.close();
 	}
 }
