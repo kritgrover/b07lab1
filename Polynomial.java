@@ -101,23 +101,31 @@ public class Polynomial{
 	public Polynomial multiply(Polynomial p) {
 		int a = this.powers.length;
 		int b = p.powers.length;
-		int newLength = a + b + 1;
+		int minExponent = Integer.MAX_VALUE;
+		int maxExponent = Integer.MIN_VALUE;
 
+		for (int power : this.powers) {
+			for (int j = 0; j < b; j++) {
+				int newExponent = power + p.powers[j];
+				if (newExponent < minExponent) {
+					minExponent = newExponent;
+				}
+				if (newExponent > maxExponent) {
+					maxExponent = newExponent;
+				}
+			}
+		}
+
+		int newLength = maxExponent - minExponent + 1;
 		double[] newCoeff = new double[newLength];
 		int[] newPowers = new int[newLength];
 
 		for (int i = 0; i < a; i++) {
 			for (int j = 0; j < b; j++) {
 				int newExponent = this.powers[i] + p.powers[j];
-
-				if (newExponent >= newLength) {
-					newLength = newExponent + 1;
-					newCoeff = Arrays.copyOf(newCoeff, newLength);
-					newPowers = Arrays.copyOf(newPowers, newLength);
-				}
-
-				newCoeff[newExponent] += (this.coeff[i] * p.coeff[j]);
-				newPowers[newExponent] = newExponent;
+				int newIndex = newExponent - minExponent;
+				newCoeff[newIndex] += (this.coeff[i] * p.coeff[j]);
+				newPowers[newIndex] = newExponent;
 			}
 		}
 
